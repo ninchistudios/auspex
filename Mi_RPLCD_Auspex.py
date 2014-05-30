@@ -28,7 +28,8 @@ lcd.clear()
 lcd.home()
 
 with cursor(lcd, 0, 2):
-    lcd.write_string('AUSPEX 410014.M2')    
+    lcd.write_string('AUSPEX 410014.M2')
+    # test github editor for spaces
 
 # draw the aquila centred on line 2
 with cursor(lcd, 1,8):
