@@ -12,7 +12,7 @@ import time
 lcd = CharLCD(pin_rs=15, pin_rw=18, pin_e=16, pins_data=[21, 22, 23, 24],
     numbering_mode=GPIO.BOARD, cols=20, rows=4, dotsize=8)
 
-# create the aquila characters
+# define the aquila custom characters
 aquila0 = (0b01111,0b00011,0b00001,0b00000,0b00000,0b00000,0b00000,0b00000)
 lcd.create_char(0,aquila0)
 aquila1 = (0b11101,0b11000,0b11111,0b11111,0b01101,0b00001,0b00011,0b00010)
@@ -29,11 +29,20 @@ lcd.create_char(3,aquila3)
 # 3: P2 VP
 menu_pos = 0
 
-# Row definitions
+# Row definitions, centering indents and text
 row_version = 0
+row_version_txt = 'AUSPEX 410014.M2'
+row_version_indent = int(round((20 - len(row_version_txt)) / 2))
 row_msg = 1
+row_msg_txt = ''
+row_msg_indent = 8
 row_met = 2
+row_met_txt = ''
+row_met_indent = 4
 row_score = 3
+row_score_txt = ''
+row_score_indent = 3
+
 
 # turn definitions
 turns = ['<T1<','>T1>','<T2<','>T2>','<T3<','>T3>','<T4<','>T4>','<T5<','>T5>','<T6<','>T6>','<T7<','>T7>','END']
@@ -61,25 +70,24 @@ GPIO.setup(but_decr, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 lcd.clear()
 lcd.home()
 
+# register events
+
 # beginning of main loop
 
-
-with cursor(lcd, 0, 2):
-    lcd.write_string('AUSPEX 410014.M2')
-    # test github editor for spaces
-    # OK it worked
+with cursor(lcd, row_version,row_version_indent):
+    lcd.write_string(row_version_txt)
 
 # draw the aquila centred on line 2
-with cursor(lcd, 1,8):
+with cursor(lcd, row_msg, row_msg_indent):
     lcd.write_string(unichr(0))
     lcd.write_string(unichr(1))
     lcd.write_string(unichr(2))
     lcd.write_string(unichr(3))
 
-with cursor(lcd,2,0):
-    lcd.write_string('MET: ' + time.strftime("%H:%M:%S", time.gmtime(time_start)))
+with cursor(lcd,row_met,row_met_indent):
+    lcd.write_string('MET ' + time.strftime("%H:%M:%S", time.gmtime(time_start)))
 
-with cursor(lcd,3,2):
+with cursor(lcd,row_score,row_score_indent):
     lcd.write_string(str_vp
                      + str(score_p1)
                      + str_sep
