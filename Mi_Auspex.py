@@ -22,20 +22,16 @@ lcd.create_char(2,aquila2)
 aquila3 = (0b11111,0b11100,0b11000,0b10000,0b00000,0b00000,0b00000,0b00000)
 lcd.create_char(3,aquila3)
 
-# current cursor location for menus
-# 0: undefined
-# 1: P1 VP
-# 2: Turn Count
-# 3: P2 VP
-menu_pos = 0
+def calc_indent(the_text):
+    return int(round((20 - len(the_text)) / 2))
 
 # Row definitions, centering indents and text
 row_version = 0
 row_version_txt = 'AUSPEX 410014.M2'
-row_version_indent = int(round((20 - len(row_version_txt)) / 2))
+row_version_indent = calc_indent(row_version_txt)
 row_msg = 1
-row_msg_txt = ''
-row_msg_indent = 8
+row_msg_txt = ""
+row_msg_indent = 0
 row_met = 2
 row_met_txt = ''
 row_met_indent = 4
@@ -43,6 +39,12 @@ row_score = 3
 row_score_txt = ''
 row_score_indent = 3
 
+# current cursor location for menus
+# 0: undefined
+# 1: P1 VP
+# 2: Turn Count
+# 3: P2 VP
+menu_pos = 0
 
 # turn definitions
 turns = ['<T1<','>T1>','<T2<','>T2>','<T3<','>T3>','<T4<','>T4>','<T5<','>T5>','<T6<','>T6>','<T7<','>T7>','END']
@@ -72,12 +74,21 @@ lcd.home()
 
 # global abort state
 abort = False
-abort_exception = None
+
+# global clear state
+req_clear = False
 
 # button event methods
 
 def callback_cycle(channel):
+    # function that moves the blinking cursor to indicate which value
+    # will be incremented or decremented
     print "falling edge detected on cycle button pin " + str(but_cycle)
+    # just for testing TODO remove
+    global score_p1
+    score_p1 += 1
+    global req_clear
+    req_clear = True
 
 def callback_incr(channel):
     print "falling edge detected on increment button pin " + str(but_incr)
@@ -96,15 +107,23 @@ def refresh(do_clear):
     if (do_clear):
         lcd.clear()
         lcd.home()
+        global req_clear
+        req_clear = False
     # version on row 0
     with cursor(lcd, row_version,row_version_indent):
         lcd.write_string(row_version_txt)
-    # aquila on row 1
-    with cursor(lcd, row_msg, row_msg_indent):
-        lcd.write_string(unichr(0))
-        lcd.write_string(unichr(1))
-        lcd.write_string(unichr(2))
-        lcd.write_string(unichr(3))
+    if (row_msg_txt == ""):
+        # no message, just display the Aquila on row 1
+        with cursor(lcd, row_msg, 8):
+            lcd.write_string(unichr(0))
+            lcd.write_string(unichr(1))
+            lcd.write_string(unichr(2))
+            lcd.write_string(unichr(3))
+    else:
+        # we have a message, display that instead
+        with cursor(lcd, row_msg, calc_indent(row_msg_txt)):
+            lcd.write_string(row_msg_txt)
+        
     # MET on row 2
     with cursor(lcd,row_met,row_met_indent):
         lcd.write_string('MET ' + format_met())
@@ -122,7 +141,7 @@ print row_version_txt + " STARTED"
 try:
     refresh(True)
     while not abort:
-        refresh(False)
+        refresh(req_clear)
         time.sleep(1)
         # print "tick.."
         
@@ -131,9 +150,9 @@ except KeyboardInterrupt:
 except:
     print "unhandled Exception, exiting: ", sys.exc_info()[0]
 finally:
-    # close down, this is throwing error?
+    # exit gracefully with useful info
     print row_version_txt + " TERMINATED"
     print "MET: " + format_met()
     print "SCORE: " + format_score()
     lcd.close(clear=True)
-    # GPIO.cleanup()
+    
