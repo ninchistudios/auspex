@@ -27,7 +27,7 @@ def calc_indent(the_text):
 
 # Row definitions, centering indents and text
 row_version = 0
-row_version_txt = 'AUSPEX 410014.M2'
+row_version_txt = 'AUSPEX 420014.M2'
 row_version_indent = calc_indent(row_version_txt)
 row_msg = 1
 row_msg_txt = ""
