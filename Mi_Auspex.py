@@ -3,7 +3,7 @@
 import RPi.GPIO as GPIO
 from RPLCD import CharLCD, cleared, cursor
 import time
-# from time import sleep
+import sys
 
 # Auspex LCD for Warhammer 40,000 Victory Point and Turn Tracking
 # https://github.com/miproductions/auspex
@@ -70,6 +70,10 @@ GPIO.setup(but_decr, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 lcd.clear()
 lcd.home()
 
+# global abort state
+abort = False
+abort_exception = None
+
 # button event methods
 
 def callback_cycle(channel):
@@ -81,10 +85,17 @@ def callback_incr(channel):
 def callback_decr(channel):
     print "falling edge detected on decrement button pin " + str(but_decr)
 
-def refresh():
+def format_score():
+    return str_vp + str(score_p1) + str_sep + turns[turn_current] + str_sep + str_vp + str(score_p2)
+
+def format_met():
+    return time.strftime("%H:%M:%S", time.gmtime(time.time() - time_start))
+
+def refresh(do_clear):
     # refresh the display
-    lcd.clear()
-    lcd.home()
+    if (do_clear):
+        lcd.clear()
+        lcd.home()
     # version on row 0
     with cursor(lcd, row_version,row_version_indent):
         lcd.write_string(row_version_txt)
@@ -96,31 +107,33 @@ def refresh():
         lcd.write_string(unichr(3))
     # MET on row 2
     with cursor(lcd,row_met,row_met_indent):
-        lcd.write_string('MET ' + time.strftime("%H:%M:%S", time.gmtime(time_start)))
+        lcd.write_string('MET ' + format_met())
     # score on row 3
     with cursor(lcd,row_score,row_score_indent):
-        lcd.write_string(str_vp
-                         + str(score_p1)
-                         + str_sep
-                         + turns[turn_current]
-                         + str_sep
-                         + str_vp
-                         + str(score_p2))
+        lcd.write_string(format_score())
 
 # register events
+GPIO.add_event_detect(but_cycle, GPIO.FALLING, callback=callback_cycle, bouncetime=200)
+GPIO.add_event_detect(but_incr, GPIO.FALLING, callback=callback_incr, bouncetime=200)
+GPIO.add_event_detect(but_decr, GPIO.FALLING, callback=callback_decr, bouncetime=200)
 
 # beginning of main loop
-
-refresh()
-
+print row_version_txt + " STARTED"
 try:
-    print "waiting for button to end..."
-    GPIO.wait_for_edge(but_cycle, GPIO.FALLING)
-    print "falling edge on " + str(but_cycle) + " detected"
-    # break
+    refresh(True)
+    while not abort:
+        refresh(False)
+        time.sleep(1)
+        # print "tick.."
+        
 except KeyboardInterrupt:
-    print "interrupted by user"
+    print "interrupted by user, exiting"
+except:
+    print "unhandled Exception, exiting: ", sys.exc_info()[0]
 finally:
     # close down, this is throwing error?
+    print row_version_txt + " TERMINATED"
+    print "MET: " + format_met()
+    print "SCORE: " + format_score()
     lcd.close(clear=True)
     # GPIO.cleanup()
