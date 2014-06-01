@@ -70,34 +70,49 @@ GPIO.setup(but_decr, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 lcd.clear()
 lcd.home()
 
+# button event methods
+
+def callback_cycle(channel):
+    print "falling edge detected on cycle button pin " + str(but_cycle)
+
+def callback_incr(channel):
+    print "falling edge detected on increment button pin " + str(but_incr)
+
+def callback_decr(channel):
+    print "falling edge detected on decrement button pin " + str(but_decr)
+
+def refresh():
+    # refresh the display
+    lcd.clear()
+    lcd.home()
+    # version on row 0
+    with cursor(lcd, row_version,row_version_indent):
+        lcd.write_string(row_version_txt)
+    # aquila on row 1
+    with cursor(lcd, row_msg, row_msg_indent):
+        lcd.write_string(unichr(0))
+        lcd.write_string(unichr(1))
+        lcd.write_string(unichr(2))
+        lcd.write_string(unichr(3))
+    # MET on row 2
+    with cursor(lcd,row_met,row_met_indent):
+        lcd.write_string('MET ' + time.strftime("%H:%M:%S", time.gmtime(time_start)))
+    # score on row 3
+    with cursor(lcd,row_score,row_score_indent):
+        lcd.write_string(str_vp
+                         + str(score_p1)
+                         + str_sep
+                         + turns[turn_current]
+                         + str_sep
+                         + str_vp
+                         + str(score_p2))
+
 # register events
 
 # beginning of main loop
 
-with cursor(lcd, row_version,row_version_indent):
-    lcd.write_string(row_version_txt)
+refresh()
 
-# draw the aquila centred on line 2
-with cursor(lcd, row_msg, row_msg_indent):
-    lcd.write_string(unichr(0))
-    lcd.write_string(unichr(1))
-    lcd.write_string(unichr(2))
-    lcd.write_string(unichr(3))
-
-with cursor(lcd,row_met,row_met_indent):
-    lcd.write_string('MET ' + time.strftime("%H:%M:%S", time.gmtime(time_start)))
-
-with cursor(lcd,row_score,row_score_indent):
-    lcd.write_string(str_vp
-                     + str(score_p1)
-                     + str_sep
-                     + turns[turn_current]
-                     + str_sep
-                     + str_vp
-                     + str(score_p2))
-
-# button press to stop
-# sleep(10)
 try:
     print "waiting for button to end..."
     GPIO.wait_for_edge(but_cycle, GPIO.FALLING)
