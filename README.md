@@ -23,7 +23,7 @@ Planned Features
 
 Version History
 =====
-* 0.1.1 | 420014.M2 | Working MET clock and event-triggered inputs
+* 0.2.0 | 420014.M2 | Working MET clock and event-triggered inputs
 * 0.1.0 | 410014.M2 | Initial experiments, working static LCD display
 
 References
