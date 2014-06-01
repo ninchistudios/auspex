@@ -2,14 +2,13 @@
 
 import RPi.GPIO as GPIO
 from RPLCD import CharLCD, cleared, cursor
-from time import sleep
+import time
+# from time import sleep
 
 # Auspex LCD for Warhammer 40,000 Victory Point and Turn Tracking
-
-# wired as here: https://github.com/dbrgn/RPLCD
+# https://github.com/miproductions/auspex
 
 # Initialize display. All values have default values and are therefore optional.
-
 lcd = CharLCD(pin_rs=15, pin_rw=18, pin_e=16, pins_data=[21, 22, 23, 24],
     numbering_mode=GPIO.BOARD, cols=20, rows=4, dotsize=8)
 
@@ -23,9 +22,47 @@ lcd.create_char(2,aquila2)
 aquila3 = (0b11111,0b11100,0b11000,0b10000,0b00000,0b00000,0b00000,0b00000)
 lcd.create_char(3,aquila3)
 
+# current cursor location for menus
+# 0: undefined
+# 1: P1 VP
+# 2: Turn Count
+# 3: P2 VP
+menu_pos = 0
+
+# Row definitions
+row_version = 0
+row_msg = 1
+row_met = 2
+row_score = 3
+
+# turn definitions
+turns = ['<T1<','>T1>','<T2<','>T2>','<T3<','>T3>','<T4<','>T4>','<T5<','>T5>','<T6<','>T6>','<T7<','>T7>','END']
+turn_current = 0
+
+# VP scores
+score_p1 = 0
+score_p2 = 0
+str_vp = 'VP:'
+str_sep = ' '
+
+# init the mission clock
+time_start = time.time()
+
+# button pins (BOARD Rev 1 numbering)
+# all should be set input pulled up
+but_cycle = 26
+but_incr = 12
+but_decr = 7
+GPIO.setup(but_cycle, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(but_incr, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(but_decr, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
 # prep the LCD
 lcd.clear()
 lcd.home()
+
+# beginning of main loop
+
 
 with cursor(lcd, 0, 2):
     lcd.write_string('AUSPEX 410014.M2')
@@ -39,14 +76,28 @@ with cursor(lcd, 1,8):
     lcd.write_string(unichr(2))
     lcd.write_string(unichr(3))
 
-with cursor(lcd,2,4):
-    lcd.write_string('MET: 1:22:45')
+with cursor(lcd,2,0):
+    lcd.write_string('MET: ' + time.strftime("%H:%M:%S", time.gmtime(time_start)))
 
 with cursor(lcd,3,2):
-    lcd.write_string('VP:03 <T2< VP:01')
+    lcd.write_string(str_vp
+                     + str(score_p1)
+                     + str_sep
+                     + turns[turn_current]
+                     + str_sep
+                     + str_vp
+                     + str(score_p2))
 
-# admire
-sleep(10)
-
-# close down, this is throwing error?
-lcd.close(clear=True)
+# button press to stop
+# sleep(10)
+try:
+    print "waiting for button to end..."
+    GPIO.wait_for_edge(but_cycle, GPIO.FALLING)
+    print "falling edge on " + str(but_cycle) + " detected"
+    # break
+except KeyboardInterrupt:
+    print "interrupted by user"
+finally:
+    # close down, this is throwing error?
+    lcd.close(clear=True)
+    # GPIO.cleanup()
