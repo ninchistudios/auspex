@@ -5,24 +5,28 @@ I'm a Java and Rails programmer learning Python, so this is going to be hilariou
 
 Current Features
 ======
-* Nope
+* Display VP and Turn counters
+* Increment/decrement VP and Turn counters
+* 3x event-triggered button inputs for cycle/increment/decrement
 
 Features In Development
 ======
-* Display VP and Turn counters
-* Increment/decrement VP and Turn counters
 * Soft reset
-* 3x event-triggered button inputs for cycle/increment/decrement
 
 Planned Features
 ======
-* Twitter integration
+* software switched LCD power
+* Twitter integration with scrolling messages
 * Sound effects
 * Text to voice
 * remote app support
 
+Known Issues:
+* DAKKA-22 LCD corruption on button presses
+
 Version History
 =====
+* 0.3.0 | 433014.M2 | Working initial software features with hardware bug
 * 0.2.0 | 420014.M2 | Working MET clock and event-triggered inputs
 * 0.1.0 | 410014.M2 | Initial experiments, working static LCD display
 
