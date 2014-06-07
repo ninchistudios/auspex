@@ -22,6 +22,7 @@ Planned Features
 * remote app support
 
 Known Issues:
+======
 * DAKKA-22 LCD corruption on button presses
 
 Version History
