@@ -21,7 +21,7 @@ Planned Features
 * Text to voice
 * remote app support
 
-Known Issues:
+Known Issues
 ======
 * DAKKA-22 | intermittent LCD corruption on button presses
 
