@@ -3,6 +3,10 @@ Auspex
 Auspex is a Python codebase for driving a 20x4 Character LCD on a Raspberry Pi to display Victory Point and Turn Counters for games of Warhammer 40,000.
 I'm a Java and Rails programmer learning Python, so this is going to be hilarious at first.
 
+Dependencies
+======
+* https://github.com/dbrgn/RPLCD RPLCD by dbrgn (thanks!)
+
 Current Features
 ======
 * Display VP and Turn counters
