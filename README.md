@@ -23,7 +23,7 @@ Planned Features
 
 Known Issues:
 ======
-* DAKKA-22 LCD corruption on button presses
+* DAKKA-22 | intermittent LCD corruption on button presses
 
 Version History
 =====
